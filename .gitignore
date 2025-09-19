@@ -1,0 +1,25 @@
+# Arquivos gerados pelo IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Build artifacts
+target/
+build/
+*.jar
+*.war
+*.ear
+
+# Arquivos de configurações locais
+.env
+docker-compose.yml
+
+# Virtual machine crash logs
+hs_err_pid*
+
+# Arquivos do S.O.
+.DS_Store
+Thumbs.db
