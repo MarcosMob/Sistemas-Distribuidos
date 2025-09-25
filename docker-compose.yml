@@ -1,0 +1,40 @@
+version: '3.8'
+
+# Define os serviços (containers) que compõem a sua aplicação
+services:
+
+  # Serviço da sua API FastAPI
+  api:
+    build: . # Constrói a imagem a partir do Dockerfile na pasta atual
+    container_name: tinder_gamer_api
+    ports:
+      # Mapeia a porta 8000 do seu computador (host) para a porta 8000 do container
+      - "8000:8000"
+    volumes:
+      # Espelha o código da sua pasta local para dentro do container.
+      # Isso permite que o --reload do uvicorn funcione, pois qualquer alteração
+      # no seu PC será refletida instantaneamente dentro do container.
+      - .:/app
+    env_file:
+      - .env # Carrega as variáveis de ambiente do arquivo .env
+    depends_on:
+      - db # Garante que o container do banco de dados (db) inicie ANTES da API
+
+  # Serviço do Banco de Dados PostgreSQL
+  db:
+    image: postgres:15-alpine # Usa uma imagem oficial e leve do PostgreSQL
+    container_name: tinder_gamer_db
+    ports:
+      # Mapeia a porta 5433 do seu computador para a porta 5432 do container.
+      # Usamos 5433 para evitar conflitos caso você já tenha um Postgres local.
+      - "5433:5432"
+    volumes:
+      # Cria um "volume nomeado" para persistir os dados do banco.
+      # Mesmo que você pare e remova os containers, os dados estarão salvos.
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env # Também usa as variáveis para configurar o usuário, senha e nome do banco
+
+# Declara o volume nomeado que será usado pelo serviço 'db'
+volumes:
+  postgres_data:
