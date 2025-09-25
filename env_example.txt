@@ -1,0 +1,32 @@
+# ===========================================
+# CONFIGURAÇÕES DO BANCO DE DADOS POSTGRESQL
+# ===========================================
+# Usuário do banco de dados
+POSTGRES_USER=gamerlink_user
+
+# Senha do banco de dados
+POSTGRES_PASSWORD=123456
+
+# Nome do banco de dados
+POSTGRES_DB=gamerlink_db
+
+# ===========================================
+# CONFIGURAÇÕES DA APLICAÇÃO
+# ===========================================
+# URL de conexão com PostgreSQL
+# Formato: postgresql://usuario:senha@host:porta/nome_do_banco
+# IMPORTANTE: O hostname "db" é o nome do serviço no docker-compose.yml
+DATABASE_URL=postgresql://gamerlink_user:123456@db:5432/gamerlink_db
+
+# ===========================================
+# CONFIGURAÇÕES DE SEGURANÇA PARA JWT (TOKENS)
+# ===========================================
+# Chave secreta para codificar os tokens de login
+# IMPORTANTE: Mude para algo aleatório e longo em produção!
+SECRET_KEY=my-secret-key-change-this-in-production
+
+# Algoritmo usado para assinar os tokens JWT
+ALGORITHM=HS256
+
+# Tempo de expiração do token em minutos
+ACCESS_TOKEN_EXPIRE_MINUTES=120

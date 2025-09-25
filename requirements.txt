@@ -1,33 +1,11 @@
-# --- Framework da API ---
-# O coração da nossa aplicação, um framework web moderno e de alta performance.
 fastapi
-
-# --- Servidor ASGI ---
-# Servidor necessário para rodar aplicações FastAPI.
-# [standard] inclui otimizações e a biblioteca "watchfiles" para o reload funcionar melhor.
 uvicorn[standard]
-
-# --- Banco de Dados e ORM ---
-# O Object-Relational Mapper (ORM) que usaremos para mapear nossas classes Python para as tabelas do banco.
 sqlalchemy
-
-# Driver para conectar a aplicação Python ao banco de dados PostgreSQL.
-# psycopg2-binary é a forma mais fácil de instalar.
 psycopg2-binary
-
-# --- Validação de Dados ---
-# Usado pelo FastAPI para validar os dados de entrada e saída (schemas).
-# [email] adiciona validação específica para formatos de e-mail.
-pydantic[email]
-
-# --- Autenticação e Segurança ---
-# Para hashear e verificar senhas de forma segura.
-# [bcrypt] especifica o algoritmo de hashing que usaremos, que é o padrão de mercado.
-passlib[bcrypt]
-
-# Para criar, codificar e decodificar JSON Web Tokens (JWT) para o sistema de login.
-python-jose[cryptography]
-
-# --- Configuração ---
-# Para carregar as variáveis de ambiente a partir do arquivo .env.
 python-dotenv
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]
+alembic
+pydantic-settings
+fastapi[all]
