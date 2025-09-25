@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Define os serviços (containers) que compõem a sua aplicação
 services:
 
