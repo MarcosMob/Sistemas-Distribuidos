@@ -23,6 +23,8 @@ docker-compose -f docker-compose.prod.yml up --build -d
 echo "✅ Verificando status dos containers..."
 docker-compose -f docker-compose.prod.yml ps
 
+docker-compose exec api alembic upgrade head
+
 # Verificar logs
 echo "📋 Últimos logs da API:"
 docker-compose -f docker-compose.prod.yml logs --tail=20 api
