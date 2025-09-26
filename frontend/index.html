@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinder Gamer - Login</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" id="login-container">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p class="message">Não tem uma conta? <a href="#" id="show-register">Registre-se</a></p>
+            </form>
+        </div>
+
+        <div class="form-container" id="register-container" style="display: none;">
+            <h2>Registrar</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Senha</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                
+                <!-- MODIFICAÇÃO AQUI: Campo de texto trocado por uma lista de seleção -->
+                <div class="form-group">
+                    <label for="register-game">Seu jogo principal</label>
+                    <select id="register-game" required>
+                        <option value="" disabled selected>Selecione um jogo...</option>
+                        <option value="League of Legends">League of Legends</option>
+                        <option value="Valorant">Valorant</option>
+                        <option value="Dead by Daylight">Dead by Daylight</option>
+                        <option value="Counter-Strike 2">Counter-Strike 2</option>
+                        <option value="Fortnite">Fortnite</option>
+                        <option value="Apex Legends">Apex Legends</option>
+                        <option value="Overwatch 2">Overwatch 2</option>
+                        <option value="Call of Duty: Warzone">Call of Duty: Warzone</option>
+                        <option value="Minecraft">Minecraft</option>
+                        <option value="EA FC 24">EA FC 24</option>
+                        <option value="Genshin Impact">Genshin Impact</option>
+                    </select>
+                </div>
+                <!-- Fim da Modificação -->
+                
+                <button type="submit">Registrar</button>
+                <p class="message">Já tem uma conta? <a href="#" id="show-login">Login</a></p>
+            </form>
+        </div>
+        <div id="error-message" class="error-message"></div>
+    </div>
+    <script src="static/js/auth.js"></script>
+</body>
+</html>
