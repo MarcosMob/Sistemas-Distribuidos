@@ -62,7 +62,40 @@ def login_for_access_token(
     access_token = auth_utils.create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Endpoint Protegido
+# Endpoint Protegido - Obter dados do usuário atual
 @router.get("/users/me", response_model=user_schema.User)
 def read_users_me(current_user: Annotated[user_schema.User, Depends(get_current_user)]):
     return current_user
+
+# Endpoint Protegido - Atualizar dados do usuário atual
+@router.put("/users/me", response_model=user_schema.User)
+def update_user_me(
+    user_update: user_schema.UserUpdate,
+    current_user: Annotated[user_schema.User, Depends(get_current_user)],
+    db: Session = Depends(get_db)
+):
+    # Verifica se o email já existe em outro usuário (se estiver sendo alterado)
+    if user_update.email and user_update.email != current_user.email:
+        existing_user = user_service.get_user_by_email(db, email=user_update.email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+    
+    updated_user = user_service.update_user(db, current_user.id, user_update)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return updated_user
+
+# Endpoint Protegido - Buscar usuários com mesmo jogo (matches)
+@router.get("/users/match", response_model=list[user_schema.User])
+def get_matches(
+    current_user: Annotated[user_schema.User, Depends(get_current_user)],
+    db: Session = Depends(get_db)
+):
+    """Busca usuários que jogam o mesmo jogo que o usuário logado"""
+    matches = user_service.get_users_with_same_game(
+        db, 
+        current_user.id, 
+        current_user.game
+    )
+    return matches

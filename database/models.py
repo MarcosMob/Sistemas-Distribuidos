@@ -1,5 +1,5 @@
 # database/models.py
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean, JSON
 from .connection import Base
 
 class User(Base):
@@ -8,3 +8,5 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    game = Column(String, nullable=True)
