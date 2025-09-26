@@ -1,6 +1,8 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from routers import auth as auth_router
 from dotenv import load_dotenv
 from database.connection import engine
@@ -28,6 +30,20 @@ app.add_middleware(
 # Inclui o router de autenticação na sua aplicação
 app.include_router(auth_router.router)
 
+# Servir arquivos estáticos do frontend
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+# Rota para servir o frontend na raiz
 @app.get("/")
-def read_root():
+async def read_root():
+    return FileResponse("frontend/index.html")
+
+# Rota para servir recommendations
+@app.get("/recommendations")
+async def recommendations():
+    return FileResponse("frontend/recommendations.html")
+
+# Rota da API (mantém separada)
+@app.get("/api")
+def api_info():
     return {"message": "Welcome to the API"}

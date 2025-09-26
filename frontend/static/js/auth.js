@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             localStorage.setItem('accessToken', data.access_token);
-            window.location.href = 'recommendations.html';
+            window.location.href = '/recommendations';
         } catch (error) {
             errorMessage.textContent = error.message;
         }
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const loginData = await loginResponse.json();
             localStorage.setItem('accessToken', loginData.access_token);
-            window.location.href = 'recommendations.html';
+            window.location.href = '/recommendations';
 
         } catch (error) {
             errorMessage.textContent = error.message;

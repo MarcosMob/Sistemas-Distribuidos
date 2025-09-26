@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('accessToken');
 
     if (!token) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
         return;
     }
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error(error);
             localStorage.removeItem('accessToken');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
     }
 
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     logoutButton.addEventListener('click', () => {
         localStorage.removeItem('accessToken');
-        window.location.href = 'index.html';
+        window.location.href = '/';
     });
 
     await fetchUserData();

@@ -1,4 +1,46 @@
+# Environment files (contém senhas - NÃO subir para Git)
 .env
-.idea
-docker-compose.yml
-Dockerfile
+.env.local
+.env.production
+.env.staging
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite3
+
+# Docker volumes (dados do banco)
+postgres_data/
+postgres_data_prod/
+
+# Backup files
+*.bak
+*.backup
