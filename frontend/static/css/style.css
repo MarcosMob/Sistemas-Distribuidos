@@ -98,10 +98,96 @@ button:hover {
     margin: 0.5rem 0;
 }
 
+.card-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.match-button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    max-width: 120px;
+}
+
+.match-button:hover:not(:disabled) {
+    background-color: #c2185b;
+    transform: translateY(-2px);
+}
+
+.match-button:disabled {
+    background-color: #4caf50;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.match-button.matched {
+    background-color: #4caf50;
+    cursor: not-allowed;
+}
+
+.match-button.pending {
+    background-color: #ff9800;
+    cursor: not-allowed;
+}
+
+.match-button.received-like {
+    background-color: #9c27b0;
+    animation: pulse 2s infinite;
+}
+
+.like-indicator {
+    color: #9c27b0;
+    font-weight: bold;
+    font-style: italic;
+    margin: 0.5rem 0;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.chat-button {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    flex: 1;
+    max-width: 120px;
+}
+
+.chat-button:hover {
+    background-color: #1976d2;
+    transform: translateY(-2px);
+}
+
 #logout-button {
     background-color: #d9534f;
 }
 
 #logout-button:hover {
     background-color: #c9302c;
+}
+
+.message-content {
+    margin-bottom: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
 }

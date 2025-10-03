@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinder Gamer - Chat</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <style>
+        .chat-container {
+            max-width: 600px;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .message.own {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.other {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .send-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .back-button {
+            background-color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        
+        .back-button:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container chat-container">
+        <h2>Chat</h2>
+        <button id="back-button" class="back-button">← Voltar para Recomendações</button>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="message-input" class="chat-input" placeholder="Digite sua mensagem...">
+            <button id="send-button" class="send-button">Enviar</button>
+        </div>
+    </div>
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
