@@ -9,6 +9,12 @@ from schemas import chat as chat_schema, user as user_schema
 from services import chat_service
 from routers.auth import get_current_user
 
+from database.connection import SessionLocal
+from fastapi import status
+from auth.utils import SECRET_KEY, ALGORITHM
+from jose import jwt, JWTError
+from services import user_service
+
 # Classe para gerenciar conexões WebSocket
 class ConnectionManager:
     def __init__(self):
@@ -44,6 +50,20 @@ class ConnectionManager:
                         conn for conn in self.active_connections[match_id] 
                         if conn != connection
                     ]
+
+
+def get_user_from_websocket_token(token: str, db: Session):
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        user = user_service.get_user_by_email(db, email=email)
+        return user
+    except JWTError:
+        return None
 
 manager = ConnectionManager()
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -87,61 +107,63 @@ def get_chat_messages(
         raise HTTPException(status_code=404, detail="Chat not found or access denied")
     return messages
 
-@router.post("/messages/{match_id}", response_model=chat_schema.ChatMessage)
-def send_message(
-    match_id: int,
-    message: chat_schema.ChatMessageCreate,
-    db: Session = Depends(get_db),
-    current_user: user_schema.User = Depends(get_current_user)
-):
-    """Envia uma mensagem para um chat"""
-    saved_message = chat_service.save_chat_message(
-        db, match_id, current_user.id, message.content
-    )
-    if saved_message is None:
-        raise HTTPException(status_code=404, detail="Chat not found or access denied")
-    
-    # Envia via WebSocket para usuários conectados
-    message_data = {
-        "type": "message",
-        "id": saved_message.id,
-        "sender_id": saved_message.sender_id,
-        "content": saved_message.content,
-        "created_at": saved_message.created_at.isoformat(),
-        "sender_name": current_user.email
-    }
-    
-    # Broadcast para todos conectados no match (exceto o remetente)
-    # Como estamos em uma função síncrona, vamos apenas salvar a mensagem
-    # O WebSocket será usado apenas para receber mensagens em tempo real
-    
-    return saved_message
-
 @router.websocket("/ws/{match_id}")
 async def websocket_endpoint(
     websocket: WebSocket, 
     match_id: int,
-    token: str = None
+    token: str  # O token virá como query param: .../ws/123?token=XYZ
 ):
-    """WebSocket para chat em tempo real"""
-    
-    # TODO: Implementar autenticação JWT no WebSocket
-    # Por enquanto, vamos aceitar qualquer conexão
-    # Em produção, você deveria validar o token JWT aqui
-    
-    await manager.connect(websocket, match_id, 0)  # user_id temporário
-    
+
+    db = SessionLocal() # Cria uma sessão de banco SÓ para esta conexão
     try:
+        # 1. AUTENTICAR
+        current_user = get_user_from_websocket_token(token, db)
+        if not current_user:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        # 2. AUTORIZAR
+        match = chat_service.get_match_by_id_and_user(db, match_id, current_user.id)
+        if not match:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        # Conexão autorizada
+        await manager.connect(websocket, match_id, current_user.id)
+
         while True:
+            # Cliente envia: {"content": "Olá!"}
             data = await websocket.receive_text()
             message_data = json.loads(data)
-            
-            # Broadcast da mensagem para todos os conectados
-            await manager.broadcast({
-                "type": "message",
-                "content": message_data.get("content", ""),
-                "sender_name": "Usuário"
-            }, match_id)
-            
+
+            # 3. PERSISTIR
+            saved_message = chat_service.save_chat_message(
+                db=db,
+                match_id=match_id,
+                sender_id=current_user.id,
+                content=message_data.get("content", "")
+            )
+
+            if saved_message:
+                # 4. DISTRIBUIR
+                # Prepara a mensagem com os dados oficiais do banco
+                broadcast_data = {
+                    "type": "message",
+                    "id": saved_message.id,
+                    "sender_id": saved_message.sender_id,
+                    "content": saved_message.content,
+                    "created_at": saved_message.created_at.isoformat(),
+                    "sender_email": current_user.email 
+                }
+
+                # Envia para todos na sala (inclusive quem enviou)
+                await manager.broadcast(broadcast_data, match_id)
+
     except WebSocketDisconnect:
         manager.disconnect(websocket, match_id)
+    except Exception as e:
+        print(f"Erro no WebSocket: {e}") # Bom para debug
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
+    finally:
+        # Garante que a sessão do banco seja fechada quando o user desconectar
+        db.close()

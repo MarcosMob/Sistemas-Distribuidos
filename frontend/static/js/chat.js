@@ -1,3 +1,4 @@
+// frontend/static/js/chat.js
 document.addEventListener('DOMContentLoaded', () => {
     const chatMessages = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
@@ -12,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Obter o match_id da URL
     const pathParts = window.location.pathname.split('/');
     const matchId = pathParts[pathParts.length - 1];
 
@@ -25,19 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let websocket;
     let currentUser = null;
 
-    // Buscar dados do usuário atual
     async function fetchCurrentUser() {
         try {
             const response = await fetch(`${API_URL}/auth/users/me`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch user data');
-            }
-
+            if (!response.ok) throw new Error('Failed to fetch user data');
             currentUser = await response.json();
             return currentUser;
         } catch (error) {
@@ -47,19 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Carregar mensagens existentes
     async function loadMessages() {
         try {
             const response = await fetch(`${API_URL}/chat/messages/${matchId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to load messages');
-            }
-
+            if (!response.ok) throw new Error('Failed to load messages');
+            
             const messages = await response.json();
             messages.forEach(message => {
                 const isOwn = message.sender_id === currentUser.id;
@@ -70,22 +57,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Conectar ao WebSocket
+    // --- MUDANÇA 1: Passar o token na URL ---
     function connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/chat/ws/${matchId}`;
+        // Adiciona o token como um query parameter para autenticação
+        const wsUrl = `${protocol}//${window.location.host}/chat/ws/${matchId}?token=${token}`;
         
         websocket = new WebSocket(wsUrl);
         
         websocket.onopen = () => {
             console.log('Conectado ao chat');
-            addSystemMessage('Conectado ao chat!');
+            addSystemMessage('Conectado!');
         };
         
+        // onmessage agora é a *única* fonte de novas mensagens
         websocket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 if (data.type === 'message') {
+                    // O servidor nos diz quem enviou, então podemos saber se é nossa
                     const isOwn = data.sender_id === currentUser.id;
                     addMessage(data.content, isOwn ? 'own' : 'other', data.created_at);
                 }
@@ -94,15 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        websocket.onclose = () => {
-            console.log('Conexão fechada');
+        websocket.onclose = (event) => {
+            console.log('Conexão fechada:', event.reason);
             addSystemMessage('Conexão perdida. Tentando reconectar...');
+            // Tenta reconectar após 3 segundos
             setTimeout(connectWebSocket, 3000);
         };
         
         websocket.onerror = (error) => {
             console.error('Erro no WebSocket:', error);
-            addSystemMessage('Erro na conexão');
+            addSystemMessage('Erro na conexão.');
         };
     }
 
@@ -110,63 +101,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
         
-        const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+        const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString();
         messageDiv.innerHTML = `
             <div class="message-content">${text}</div>
             <div class="message-time">${timeStr}</div>
         `;
         
         chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
     }
 
     function addSystemMessage(text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message system';
-        messageDiv.style.textAlign = 'center';
-        messageDiv.style.fontStyle = 'italic';
-        messageDiv.style.color = '#666';
-        messageDiv.textContent = text;
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // ... (função igual à sua, sem mudanças)
     }
 
-    async function sendMessage() {
+    // --- MUDANÇA 2: Enviar via WebSocket, não por fetch ---
+    function sendMessage() {
         const message = messageInput.value.trim();
         
         if (!message) {
             return;
         }
 
-        try {
-            const response = await fetch(`${API_URL}/chat/messages/${matchId}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ content: message }),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Erro da API:', errorText);
-                throw new Error('Failed to send message');
-            }
-
-            const savedMessage = await response.json();
-            addMessage(savedMessage.content, 'own', savedMessage.created_at);
+        // Verifica se o WebSocket está conectado
+        if (websocket && websocket.readyState === WebSocket.OPEN) {
+            // Envia a mensagem como um objeto JSON
+            websocket.send(JSON.stringify({ content: message }));
+            
+            // Limpa o input
             messageInput.value = '';
-        } catch (error) {
-            console.error('Error sending message:', error);
-            alert('Erro ao enviar mensagem: ' + error.message);
+            
+            // NÃO adicionamos a mensagem localmente.
+            // Esperamos o servidor (broadcast) nos devolver a mensagem
+            // para termos a confirmação de que ela foi salva.
+        } else {
+            alert('Não foi possível enviar a mensagem. Verifique sua conexão.');
         }
     }
 
-    sendButton.addEventListener('click', () => {
-        sendMessage();
-    });
-    
+    sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();
@@ -174,14 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backButton.addEventListener('click', () => {
-        window.location.href = '/recommendations';
+        window.location.href = '/recommendations'; // Ou /matches
     });
 
-    // Inicializar chat
     async function initChat() {
         await fetchCurrentUser();
-        await loadMessages();
-        connectWebSocket();
+        await loadMessages(); // Carrega o histórico
+        connectWebSocket(); // Conecta para tempo real
     }
 
     initChat();

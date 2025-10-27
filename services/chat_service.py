@@ -64,3 +64,14 @@ def get_user_chats(db: Session, user_id: int):
     ).all()
     
     return matches
+
+def get_match_by_id_and_user(db: Session, match_id: int, user_id: int):
+    """
+    Verifica se um match existe, está 'MATCHED' e se o usuário 
+    especificado faz parte dele.
+    """
+    return db.query(models.Match).filter(
+        models.Match.id == match_id,
+        models.Match.status == models.MatchStatus.MATCHED,
+        (models.Match.user_a_id == user_id) | (models.Match.user_b_id == user_id)
+    ).first()
