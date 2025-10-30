@@ -9,3 +9,4 @@ python-jose[cryptography]
 alembic
 pydantic-settings
 fastapi[all]
+gunicorn
