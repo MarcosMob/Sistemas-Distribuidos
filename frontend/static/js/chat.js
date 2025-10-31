@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.getElementById('send-button');
     const backButton = document.getElementById('back-button');
 
-    const API_URL = 'http://127.0.0.1:8000';
+    const API_URL = '';
     const token = localStorage.getItem('accessToken');
     
     if (!token) {

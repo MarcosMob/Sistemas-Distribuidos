@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const recommendationsContainer = document.getElementById('recommendations-container');
     const logoutButton = document.getElementById('logout-button');
 
-    const API_URL = 'http://127.0.0.1:8000';
+    const API_URL = '';
     const token = localStorage.getItem('accessToken');
 
     if (!token) {

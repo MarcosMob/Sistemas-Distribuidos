@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerContainer = document.getElementById('register-container');
     const errorMessage = document.getElementById('error-message');
 
-    const API_URL = 'http://127.0.0.1:8000';
+    const API_URL = '';
 
     showRegister.addEventListener('click', (e) => {
         e.preventDefault();

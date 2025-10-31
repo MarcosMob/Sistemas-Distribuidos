@@ -1,28 +1,54 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tinder_gamer_proxy
+    # Expõe a porta 80 para o mundo e a mapeia para a porta 80 do container
+    ports:
+      - "80:80"
+    volumes:
+      # Mapeia seu arquivo de configuração para dentro do container
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - api # O Nginx só inicia depois que a API estiver pronta
+
   db:
     image: postgres:15-alpine
-    container_name: tinder_gamer_db
+    container_name: tinder_gamer_db_prod
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env
-    ports:
-      - "5432:5432"
+      - postgres_data_prod:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # NÃO precisa mais expor a porta (5433) para o mundo.
+    # Apenas os outros containers precisam vê-la.
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   api:
-    container_name: tinder_gamer_api
-    build: .
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - .:/app
-    ports:
-      - "8001:8000"
-    env_file:
-      - ./.env
+    container_name: tinder_gamer_api_prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    # NÃO precisa mais expor a porta (8001).
+    # Apenas o Nginx falará com ela.
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      ENVIRONMENT: production
+      DEBUG: "false"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres_data_prod:
