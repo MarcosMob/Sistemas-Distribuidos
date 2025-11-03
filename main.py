@@ -49,10 +49,10 @@ app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 async def read_root():
     return FileResponse("frontend/index.html")
 
-# Rota para servir a página de recomendações
-@app.get("/recommendations", include_in_schema=False)
-async def recommendations():
-    return FileResponse("frontend/recommendations.html")
+# Rota para servir a página de seleção de jogo
+@app.get("/game-selector.html", include_in_schema=False)
+async def game_selector():
+    return FileResponse("frontend/game-selector.html")
 
 # Rota para servir a página de chat
 @app.get("/chat/{match_id}", include_in_schema=False)

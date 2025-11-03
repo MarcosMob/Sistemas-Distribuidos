@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!matchId || isNaN(matchId)) {
         alert('ID de match inválido');
-        window.location.href = '/recommendations';
+        window.location.href = '/game-selector.html';
         return;
     }
 
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backButton.addEventListener('click', () => {
-        window.location.href = '/recommendations'; // Ou /matches
+        window.location.href = '/game-selector.html';
     });
 
     async function initChat() {
