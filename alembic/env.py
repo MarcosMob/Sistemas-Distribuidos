@@ -1,10 +1,12 @@
 import os
-from dotenv import load_dotenv
+import sys
 
-# Carrega as variáveis do .env para o ambiente do Alembic
-# Aponte para o diretório raiz do projeto onde o .env está
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
-load_dotenv(dotenv_path)
+# Adiciona o diretório raiz ao path para importar o módulo config
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Carrega secrets do AWS Secrets Manager (com fallback para .env)
+from config import load_secrets
+load_secrets()
 
 # --- NOSSA LINHA DE DEBUG ---
 # print(f"--- DEBUG INFO ---")

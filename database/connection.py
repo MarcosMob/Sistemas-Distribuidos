@@ -3,10 +3,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
 
-load_dotenv() # Carrega as variáveis do arquivo .env
-
+# As variáveis de ambiente são carregadas no main.py via AWS Secrets Manager ou .env
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

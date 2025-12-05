@@ -1,9 +1,14 @@
 # main.py
+# IMPORTANTE: Carregar secrets ANTES de qualquer importação que dependa de variáveis de ambiente
+from config import load_secrets
+
+# Carrega secrets do AWS Secrets Manager (com fallback para .env)
+load_secrets()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from dotenv import load_dotenv
 
 # --- MUDANÇA 1: Limpeza e centralização das importações dos routers ---
 # Importe todos os módulos de rotas que você vai usar.
@@ -11,9 +16,6 @@ from routers import auth, match, chat
 
 from database.connection import engine
 from database import models
-
-# Carrega as variáveis de ambiente
-load_dotenv()
 
 # Descomente apenas se precisar criar as tabelas sem usar o Alembic
 # models.Base.metadata.create_all(bind=engine) 

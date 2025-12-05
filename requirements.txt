@@ -10,3 +10,4 @@ alembic
 pydantic-settings
 fastapi[all]
 gunicorn
+boto3
